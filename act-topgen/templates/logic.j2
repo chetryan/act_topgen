@@ -62,13 +62,19 @@
 {% endfor %}
 {# Add the other nodes to the list #}
 {% for node in avd_ext_nodes %}
-{%    do nodes_list.append({node: avd_ext_nodes[node]})%}
+{%     do nodes_list.append({node: avd_ext_nodes[node]}) %}
 {% endfor %}
 {% if act_add_cvp %}
-{%     do nodes_list.append({ "cvp": {"ip_addr": act_cvp_ip, "node_type": "cvp"}}) %}
+{#     try to get ip from terminattr config #}
+{%     if hostvars[ansible_play_hosts_all[0]].daemon_terminattr.cvaddrs is defined and act_cvp_discover is arista.avd.defined(true) %}
+{%         set cvp_ip = hostvars[ansible_play_hosts_all[0]].daemon_terminattr.cvaddrs[0] | split(":") %}
+{%         do nodes_list.append({ "cvp": {"ip_addr": cvp_ip[0], "node_type": "cvp"}}) %}
+{%     else %}
+{%         do nodes_list.append({ "cvp": {"ip_addr": act_cvp_ip, "node_type": "cvp"}}) %}
+{%     endif %}
 {% endif %}
 {% if act_add_ansible_node %}
-{%     do nodes_list.append({"ansible": {"ip_addr": act_ansible_ip, "node_type": "generic"}}) %}
+{%     do nodes_list.append({"ansible": {"ip_addr": act_ansible_ip, "node_type": "generic" }}) %}
 {% endif %}
 {% set nodes_data.nodes = {"nodes": nodes_list} %}
 {# Build nodes_data.node_defaults #}
